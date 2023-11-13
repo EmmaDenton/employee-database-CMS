@@ -8,7 +8,7 @@ const db = mysql.createConnection(
   {
     host: 'localhost',
     user: 'root',
-    password: '',
+    password: 'jecsHcEvKh32yQ2rEuMP',
     database: 'employeeCMS_db'
   }
 );
@@ -63,7 +63,7 @@ function init() {
 }
 
 function viewAllEmployees() {
-  const query = 'SELECT * FROM employee';
+  const query = 'TABLE employee';
 
   db.query(query, (err, results) => {
     if (err) {
@@ -100,59 +100,67 @@ function addEmployee() {
   const rolesQuery = 'SELECT id, title FROM role';
   const employeesQuery = 'SELECT first_name, id FROM employee';
 
-  db.query(rolesQuery, (err, roles, employees) => {
+  // Query for roles first
+  db.query(rolesQuery, (err, roles) => {
     if (err) {
       console.error('Error retrieving roles:', err);
       return;
     }
 
-    const roleChoices = roles.map((role) => ({ name: role.title, value: role.id }));
-    const managerChoices = employees.map((employee) => ({ name: employee.first_name, value: employee.id }));
+    // Query for employees (managers) separately
+    db.query(employeesQuery, (err, employees) => {
+      if (err) {
+        console.error('Error retrieving employees:', err);
+        return;
+      }
 
-    inquirer
-      .prompt([
-        {
-          type: 'input',
-          name: 'employeeFirstname',
-          message: "What is the employee's first name?",
-        },
-        {
-          type: 'input',
-          name: 'employeeLastname',
-          message: "What is the employee's last name?",
-        },
-        {
-          type: 'list',
-          name: 'employeeRole',
-          message: "What is this employee's role?",
-          choices: roleChoices,
-        },
-        {
-          type: 'list',
-          name: 'employeeManager',
-          message: "What is this employee's manager?",
-          choices: managerChoices,
-        },
-      ])
-      .then((answer) => {
-        const firstName = answer.employeeFirstname;
-        const lastName = answer.employeeLastname;
-        const roleId = answer.employeeRole;
-        const managerId = answer.employeeManager;
+      const roleChoices = roles.map((role) => ({ name: role.title, value: role.id }));
+      const managerChoices = employees.map((employee) => ({ name: employee.first_name, value: employee.id }));
 
+      inquirer
+        .prompt([
+          {
+            type: 'input',
+            name: 'employeeFirstname',
+            message: "What is the employee's first name?",
+          },
+          {
+            type: 'input',
+            name: 'employeeLastname',
+            message: "What is the employee's last name?",
+          },
+          {
+            type: 'list',
+            name: 'employeeRole',
+            message: "What is this employee's role?",
+            choices: roleChoices,
+          },
+          {
+            type: 'list',
+            name: 'employeeManager',
+            message: "What is this employee's manager?",
+            choices: managerChoices,
+          },
+        ])
+        .then((answer) => {
+          const firstName = answer.employeeFirstname;
+          const lastName = answer.employeeLastname;
+          const roleId = answer.employeeRole;
+          const managerId = answer.employeeManager;
 
-        const query = 'INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)';
+          const query = 'INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)';
 
-        db.query(query, [firstName, lastName, roleId, managerId], (err, result) => {
-          if (err) {
-            console.error('Error adding employee:', err);
-            return;
-          }
+          db.query(query, [firstName, lastName, roleId, managerId], (err, result) => {
+            if (err) {
+              console.error('Error adding employee:', err);
+              return;
+            }
 
-          console.log(`Employee "${firstName} ${lastName}" added successfully.`);
-          init();
+            console.log(`Employee "${firstName} ${lastName}" added successfully.`);
+            init();
+          });
         });
-      });
+    });
   });
 }
 
