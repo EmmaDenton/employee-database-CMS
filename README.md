@@ -2,6 +2,7 @@
 
 Project is an employee database. When started users are prompted to view Employees, Roles or Departments, Add Employees, Roles or Departments or Update Employees. If the user selects to view a table in the database they are presented with a list of the data contained in that table. If they select to add to the database they are asked follow up questions and their answers are added as a new row. If the user selects Update Employee they can retrieve an existing employee and update their role.
 
+![](assets/Employee-Database-CMS.mov)
 
 ## User Story
 
